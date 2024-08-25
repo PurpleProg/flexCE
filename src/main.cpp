@@ -4,11 +4,13 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 */
 
 #include <iostream>
+#include <set>
 #include <SDL.h>
 #include "../include/player.hpp"
 
 
-void update(void);
+void handle_events(bool *running, std::set<SDL_Keycode> *keys);
+void update(std::set<SDL_Keycode> *keys, Player *player);
 void render(SDL_Renderer* renderer, Player *player);
 
 
@@ -47,13 +49,14 @@ int main(void) {
         return 1;
     }
 
-    Player player = Player(0, 0, TILE_SIZE);
-
+    static Player player = Player(0, 0, TILE_SIZE);
+    std::set<SDL_Keycode> keys;
     bool running = true;
 
     // mainloop
     while (running) {
-        update();
+        handle_events(&running, &keys);
+        update(&keys, &player);
         render(renderer, &player);
     }
 
@@ -65,8 +68,43 @@ int main(void) {
 }
 
 
-void update(void) {
-    // no
+void handle_events(bool *running, std::set<SDL_Keycode> *keys) {
+    SDL_Event event;
+    if (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                *running = false;
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        *running = false;
+                    case SDLK_RIGHT:
+                        keys->insert(event.key.keysym.sym);
+                    case SDLK_LEFT:
+                        keys->insert(event.key.keysym.sym);
+                    case SDLK_UP:
+                        keys->insert(event.key.keysym.sym);
+                    case SDLK_DOWN:
+                        keys->insert(event.key.keysym.sym);
+                }
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym) {
+                    case SDLK_RIGHT:
+                        keys->erase(event.key.keysym.sym);
+                    case SDLK_LEFT:
+                        keys->erase(event.key.keysym.sym);
+                    case SDLK_UP:
+                        keys->erase(event.key.keysym.sym);
+                    case SDLK_DOWN:
+                        keys->erase(event.key.keysym.sym);
+                }
+        }
+    }
+}
+
+
+void update(std::set<SDL_Keycode> *keys, Player *player) {
+    player->update(keys);
 }
 
 
@@ -79,6 +117,4 @@ void render(SDL_Renderer *renderer, Player *player) {
 
     // update the screen
     SDL_RenderPresent(renderer);
-    SDL_Delay(16);   // almost 60 FPS
-
 }

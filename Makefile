@@ -4,7 +4,7 @@
 SRC = $(wildcard src/*.cpp)
 OBJ = $(SRC:src/%.cpp=obj/%.o)   ## $(VAR:PATERN=REPLACEMENT)
 CXXFLAGS = -Wall $(shell sdl2-config --cflags --libs)
-LDFLAGS = $(shell sdl2-config --cflags --libs)
+LDFLAGS = $(shell sdl2-config --cflags --libs) -lSDL2
 CXX = g++
 
 
