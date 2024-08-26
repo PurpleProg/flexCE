@@ -10,14 +10,17 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 
 
 void handle_events(bool *running, std::set<SDL_Keycode> *keys);
-void update(std::set<SDL_Keycode> *keys, Player *player);
-void render(SDL_Renderer* renderer, Player *player);
+void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries);
+void render(SDL_Renderer* main_renderer, Player *player);
 
 
 int main(void) {
 
     // constant declaration
     const int TILE_SIZE = 32;
+    const int FPS = 60;
+    const int SCREEN_WIDTH = 1080;
+    const int SCREEN_HEIGHT = 640;
 
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -30,22 +33,22 @@ int main(void) {
         "Hi i guess ?",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        640, 480,
-        0
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        0   // flag
     );
     if (window == NULL) {
         std::cout << "windows creation failed" << SDL_GetError() << '\n';
         return 1;
     }
 
-    // declare the renderer (wtf is that :cry:)
-    SDL_Renderer *renderer = SDL_CreateRenderer(
+    // declare the main_renderer (wtf is that :cry:)
+    SDL_Renderer *main_renderer = SDL_CreateRenderer(
         window,
         -1,
         SDL_RENDERER_ACCELERATED
     );
-    if (renderer == NULL) {
-        std::cout << "renderer creation failed" << SDL_GetError() << '\n';
+    if (main_renderer == NULL) {
+        std::cout << "main_renderer creation failed" << SDL_GetError() << '\n';
         return 1;
     }
 
@@ -53,15 +56,17 @@ int main(void) {
     std::set<SDL_Keycode> keys;
     bool running = true;
 
+    SDL_Rect boundaries = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+
     // mainloop
     while (running) {
         handle_events(&running, &keys);
-        update(&keys, &player);
-        render(renderer, &player);
+        update(&player, &keys, &boundaries);
+        render(main_renderer, &player);
     }
 
-
-    SDL_DestroyRenderer(renderer);
+    // quit the game
+    SDL_DestroyRenderer(main_renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
@@ -69,52 +74,65 @@ int main(void) {
 
 
 void handle_events(bool *running, std::set<SDL_Keycode> *keys) {
+    // gather keypress in a set (keys)
     SDL_Event event;
     if (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
                 *running = false;
+                break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                     case SDLK_ESCAPE:
                         *running = false;
+                        break;
                     case SDLK_RIGHT:
                         keys->insert(event.key.keysym.sym);
+                        break;
                     case SDLK_LEFT:
                         keys->insert(event.key.keysym.sym);
+                        break;
                     case SDLK_UP:
                         keys->insert(event.key.keysym.sym);
+                        break;
                     case SDLK_DOWN:
                         keys->insert(event.key.keysym.sym);
+                        break;
                 }
+                break;
             case SDL_KEYUP:
                 switch (event.key.keysym.sym) {
                     case SDLK_RIGHT:
                         keys->erase(event.key.keysym.sym);
+                        break;
                     case SDLK_LEFT:
                         keys->erase(event.key.keysym.sym);
+                        break;
                     case SDLK_UP:
                         keys->erase(event.key.keysym.sym);
+                        break;
                     case SDLK_DOWN:
                         keys->erase(event.key.keysym.sym);
+                        break;
                 }
+                break;
         }
     }
 }
 
 
-void update(std::set<SDL_Keycode> *keys, Player *player) {
-    player->update(keys);
+void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
+    player->update(keys, boundaries);
 }
 
 
-void render(SDL_Renderer *renderer, Player *player) {
+void render(SDL_Renderer *main_renderer, Player *player) {
     // clear the screen
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(main_renderer, 80, 10, 100, 255);  // deep purple
+    SDL_RenderClear(main_renderer);
 
-    player->render(renderer);
+    player->render(main_renderer);
 
     // update the screen
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(main_renderer);
 }
