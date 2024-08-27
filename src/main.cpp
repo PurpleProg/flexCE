@@ -181,12 +181,12 @@ void render(SDL_Renderer *renderer, SDL_Texture *texture_2d, SDL_Texture *textur
     // yes
     SDL_SetRenderDrawColor(renderer, 100, 170, 250, 255);  // ligth blue
     SDL_RenderClear(renderer);
+    render_rays(renderer, player, map);
 
 
     // render a 2D minimap
     SDL_SetRenderTarget(renderer, texture_2d);
     render_map(renderer, map);
-    render_rays(renderer, player, map);
     player->render(renderer);
 
 

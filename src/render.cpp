@@ -26,6 +26,8 @@ void render_map(SDL_Renderer *renderer, const struct Map &map) {
 void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) {
     // cast a ray for each pixel on screen
     const int WIDTH = map.TILE_SIZE*map.COLUMNS * 2;
+    const int HEIGHT = map.TILE_SIZE*map.ROWS;
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 150);
     for (int x = 0; x<WIDTH; x++) {
         double camera_x = (x/(double)WIDTH * 2) -1;   // project world x in camera space (range -1 to 1)
         double ray_dir_x = player->dir_x + player->plane_x * camera_x;
@@ -52,7 +54,6 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         bool ray_hit_on_x_axis;
 
 
-        /////////////////////////////////////////////////////////
         // calculate initial ray position
         if (ray_dir_x > 0) {  // right
             step_x = 1;
@@ -68,5 +69,37 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
             step_y = -1;
             ray_len_y = ((player->rect.y - (player->rect.h/2.0)) - map_pos_y) * unit_distance_y;
         }
+
+        // perform the DDA
+        while (!ray_hit) {
+            if (ray_len_x < ray_len_y) {
+                ray_len_x += unit_distance_x;
+                map_pos_x += step_x;
+                ray_hit_on_x_axis = true;
+            } else {
+                ray_len_y += unit_distance_y;
+                map_pos_y += step_y;
+                ray_hit_on_x_axis = false;
+            }
+            if (map.DATA[map_pos_y][map_pos_x]) {
+                ray_hit = true;
+            }
+        }
+
+        // render the lines
+        double line_height;
+        if (ray_hit_on_x_axis) {line_height = (WIDTH * map.TILE_SIZE)/ray_len_x;}
+        else {line_height = (WIDTH * map.TILE_SIZE)/ray_len_y;}
+
+        int start_y = HEIGHT/2 - line_height-2;
+        int end_y = start_y + line_height;
+
+        SDL_RenderDrawLineF(
+            renderer,
+            x,
+            start_y,
+            x,
+            end_y
+        );
     }
 }
