@@ -91,8 +91,8 @@ void Player::render(SDL_Renderer *renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);  // yellow
     float centerx = (rect.x + rect.w/2.0);
     float centery = (rect.y + rect.h/2.0);
-    float dir_end_x = centerx + std::cos(angle) * 30;
-    float dir_ent_y = centery + std::sin(angle) * 30;
+    float dir_end_x = centerx + dir_x * 20;
+    float dir_ent_y = centery + dir_y * 20;
     SDL_RenderDrawLineF(
         renderer,
         centerx,

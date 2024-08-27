@@ -40,7 +40,7 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         double unit_distance_x = std::abs(1/ray_dir_x);
         double unit_distance_y = std::abs(1/ray_dir_y);
 
-        // ray lenght. this is the euclidian distance, not a side.
+        // ray lenght. this is the euclidian distance, not a side. Or is it ?
         double ray_len_x = 0;
         double ray_len_y = 0;
 
@@ -84,7 +84,12 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
                 map_pos_y += step_y;
                 ray_hit_on_x_axis = false;
             }
+            // check map
             if (map.DATA[map_pos_y][map_pos_x]) {
+                ray_hit = true;
+            }
+            // prevent ray OoB
+            if (map_pos_x >= map.COLUMNS || map_pos_x < 0 || map_pos_y >= map.ROWS || map_pos_y < 0) {
                 ray_hit = true;
             }
         }
