@@ -52,7 +52,7 @@ int main(void) {
         return 1;
     }
 
-    static Player player = Player(0, 0, TILE_SIZE);
+    static Player player = Player(5.0, 5.0, (float)TILE_SIZE);
     std::set<SDL_Keycode> keys;
     bool running = true;
 
@@ -98,6 +98,24 @@ void handle_events(bool *running, std::set<SDL_Keycode> *keys) {
                     case SDLK_DOWN:
                         keys->insert(event.key.keysym.sym);
                         break;
+                    case SDLK_a:
+                        keys->insert(event.key.keysym.sym);
+                        break;
+                    case SDLK_w:
+                        keys->insert(event.key.keysym.sym);
+                        break;
+                    case SDLK_s:
+                        keys->insert(event.key.keysym.sym);
+                        break;
+                    case SDLK_d:
+                        keys->insert(event.key.keysym.sym);
+                        break;
+                    case SDLK_RSHIFT:
+                        keys->insert(event.key.keysym.sym);
+                        break;
+                    case SDLK_LSHIFT:
+                        keys->insert(event.key.keysym.sym);
+                        break;
                 }
                 break;
             case SDL_KEYUP:
@@ -112,6 +130,24 @@ void handle_events(bool *running, std::set<SDL_Keycode> *keys) {
                         keys->erase(event.key.keysym.sym);
                         break;
                     case SDLK_DOWN:
+                        keys->erase(event.key.keysym.sym);
+                        break;
+                    case SDLK_a:
+                        keys->erase(event.key.keysym.sym);
+                        break;
+                    case SDLK_w:
+                        keys->erase(event.key.keysym.sym);
+                        break;
+                    case SDLK_s:
+                        keys->erase(event.key.keysym.sym);
+                        break;
+                    case SDLK_d:
+                        keys->erase(event.key.keysym.sym);
+                        break;
+                    case SDLK_RSHIFT:
+                        keys->erase(event.key.keysym.sym);
+                        break;
+                    case SDLK_LSHIFT:
                         keys->erase(event.key.keysym.sym);
                         break;
                 }
