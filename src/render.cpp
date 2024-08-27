@@ -3,26 +3,6 @@
 #include "../include/render.hpp"
 
 
-void render_map(SDL_Renderer *renderer, const struct Map &map) {
-    for (int row_index = 0; row_index < map.ROWS; row_index++) {
-        for (int column_index = 0; column_index < map.COLUMNS; column_index++) {
-
-            if (map.DATA[row_index][column_index]) {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // tile are blue
-            } else {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); // transparent
-            }
-            SDL_Rect tile_rect = {
-                column_index*map.TILE_SIZE,
-                row_index*map.TILE_SIZE,
-                map.TILE_SIZE, map.TILE_SIZE
-            };
-            SDL_RenderFillRect(renderer, &tile_rect);
-        }
-    }
-}
-
-
 void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) {
     // cast a ray for each pixel on screen
     for (int x = 0; x<map.WIDTH; x++) {
@@ -96,10 +76,10 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         double perpendicular_wall_distance;
         if (ray_hit_on_x_axis) {
             perpendicular_wall_distance = ray_len_x - unit_distance_x;
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         } else {
             perpendicular_wall_distance = ray_len_y - unit_distance_y;
-            SDL_SetRenderDrawColor(renderer, 100, 0, 0, 255);
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         }
 
         double line_height = (int)map.HEIGHT/perpendicular_wall_distance;

@@ -3,19 +3,19 @@ flexCE is a wolfenstein3D-like raycasting "game"
 writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapenning soon).
 */
 
-#include <iostream>
 #include <set>
 #include <chrono>
 #include <SDL.h>
-#include "../include/player.hpp"
 #include "../include/render.hpp"
+#include "../include/player.hpp"
+#include "../include/map.hpp"
 
 
 int sdl_init(SDL_Window **window, SDL_Renderer **renderer, const struct Map &map);
 uint64_t get_current_time(void);
 
 void handle_events(bool *running, std::set<SDL_Keycode> *keys);
-void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries);
+void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries, const struct Map &map);
 void render(SDL_Renderer* renderer, Player *player, const struct Map &map);
 
 
@@ -31,13 +31,13 @@ int main(void) {
     SDL_Window *window = nullptr;
     SDL_Renderer *renderer = nullptr;
     if (sdl_init(&window, &renderer, map)) {
-        std::cout << "sdl init failed" << '\n';
+        // std::cout << "sdl init failed" << '\n';
         return 1;
     }
 
     // declare objects
     static Player player = Player(256.0, 256.0, (float)(map.TILE_SIZE/2));
-    SDL_Rect boundaries = {0, 0, (map.TILE_SIZE*map.COLUMNS), (map.TILE_SIZE*map.ROWS)};
+    SDL_Rect boundaries = {0, 0, map.WIDTH, map.HEIGHT};
     std::set<SDL_Keycode> keys;
 
     // framerate limitation
@@ -51,7 +51,7 @@ int main(void) {
         start_time = get_current_time();
 
         handle_events(&running, &keys);
-        update(&player, &keys, &boundaries);
+        update(&player, &keys, &boundaries, map);
         render(renderer, &player, map);
 
         // cap FPS to a max value (or a litter less FPS due to SDL_Delay aproximations)
@@ -63,7 +63,7 @@ int main(void) {
         if (DEBUG_FPS) {
         elapsed_time = get_current_time() - start_time;
         float fps = 1000/elapsed_time;
-        std::cout << fps << '\n';
+        // std::cout << fps << '\n';
         }
 
     }
@@ -160,8 +160,8 @@ void handle_events(bool *running, std::set<SDL_Keycode> *keys) {
 }
 
 
-void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
-    player->update(keys, boundaries);
+void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries, const struct Map &map) {
+    player->update(keys, boundaries, map);
 }
 
 
@@ -195,7 +195,7 @@ int sdl_init(
     const struct Map &map
 ) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        std::cout << "sld init error : " << SDL_GetError() << '\n';
+        // std::cout << "sld init error : " << SDL_GetError() << '\n';
         return 1;
     }
     // declare the windows
@@ -207,7 +207,7 @@ int sdl_init(
         0   // flag
     );
     if (*window == NULL) {
-        std::cout << "windows creation failed" << SDL_GetError() << '\n';
+        // std::cout << "windows creation failed" << SDL_GetError() << '\n';
         return 1;
     }
     // declare the renderer (wtf is that :cry:)
@@ -217,7 +217,7 @@ int sdl_init(
         SDL_RENDERER_ACCELERATED
     );
     if (*renderer == NULL) {
-        std::cout << "renderer creation failed" << SDL_GetError() << '\n';
+        // std::cout << "renderer creation failed" << SDL_GetError() << '\n';
         return 1;
     }
 

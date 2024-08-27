@@ -1,10 +1,11 @@
-#include "../include/player.hpp"
-#include <iostream>
 #include <math.h>
+#include "../include/map.hpp"
+#include "../include/player.hpp"
 
 
 Player::Player(float startx, float starty, float size) {
     rect = {startx, starty, size, size};
+    prev_rect = rect;
     BASE_SPEED = 2.5;
     FOV = 60.0;
 
@@ -19,7 +20,9 @@ Player::Player(float startx, float starty, float size) {
     plane_y = 0.66;
 }
 
-void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
+void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries, const struct Map &map) {
+
+    prev_rect = rect;
 
     // check sprint
     if (keys->count(SDLK_RSHIFT) || keys->count(SDLK_LSHIFT)) {
@@ -28,7 +31,7 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
         speed = BASE_SPEED;
     }
 
-    // update angle
+    // update angle and rotate plane
     if (keys->count(SDLK_RIGHT)) {
         angle += angle_rotation_speed;
         // update/rotate plane
@@ -68,6 +71,7 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
 
     // collide
     collide_boundaries(boundaries);
+    collide_map(map);
 }
 
 
@@ -78,6 +82,43 @@ void Player::collide_boundaries(SDL_Rect *boundaries) {
     if (rect.x < boundaries->x) {rect.x = boundaries->x;} // left
     if ((rect.y + rect.h) > (boundaries->y + boundaries->h)) {rect.y = (boundaries->y + boundaries->h - rect.h);} // bottom
     if (rect.y < boundaries->y) {rect.y = boundaries->y;}     // top
+}
+
+
+void Player::collide_map(const struct Map &map) {
+    for (int row_index = 0; row_index < map.ROWS; row_index++) {
+        for (int column_index = 0; column_index < map.COLUMNS; column_index++) {
+            if (map.DATA[row_index][column_index]) {
+                // check rect collision
+                if (rect.x + rect.w > column_index*map.TILE_SIZE && rect.x < (column_index + 1)*map.TILE_SIZE) {
+                    // x collision
+                    if (rect.y + rect.h > row_index*map.TILE_SIZE && rect.y < (row_index + 1)*map.TILE_SIZE) {
+                        // y collision too
+                        float delta_x = std::abs(rect.x - column_index*map.TILE_SIZE);
+                        float delta_y = std::abs(rect.y - row_index*map.TILE_SIZE);
+                        if (delta_x > delta_y) {
+                            // from y axis
+                            if ((rect.y - prev_rect.y) > 0) {
+                                // from top
+                                rect.y = row_index*map.TILE_SIZE - rect.h;
+                            } else {
+                                // from bottom
+                                rect.y = row_index*map.TILE_SIZE + rect.h;
+                            }
+                        } else {
+                            // form x axis
+                            if ((rect.x - prev_rect.x) > 0) {
+                                // from left
+                                rect.x = column_index*map.TILE_SIZE - rect.w;
+                            } else { // from the right
+                                rect.x = column_index*map.TILE_SIZE + rect.w;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 
