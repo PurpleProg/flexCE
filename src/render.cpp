@@ -25,10 +25,8 @@ void render_map(SDL_Renderer *renderer, const struct Map &map) {
 
 void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) {
     // cast a ray for each pixel on screen
-    const int WIDTH = map.TILE_SIZE*map.COLUMNS * 2;
-    const int HEIGHT = map.TILE_SIZE*map.ROWS;
-    for (int x = 0; x<WIDTH; x++) {
-        double camera_x = (x/(double)WIDTH * 2) -1;   // project world x in camera space (range -1 to 1)
+    for (int x = 0; x<map.WIDTH; x++) {
+        double camera_x = (x/(double)map.WIDTH * 2) -1;   // project world x in camera space (range -1 to 1)
         double ray_dir_x = player->dir_x + player->plane_x * camera_x;
         double ray_dir_y = player->dir_y + player->plane_y * camera_x;
 
@@ -104,8 +102,8 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
             SDL_SetRenderDrawColor(renderer, 100, 0, 0, 255);
         }
 
-        double line_height = (int)HEIGHT/perpendicular_wall_distance;
-        int start_y = HEIGHT/2 - line_height/2;
+        double line_height = (int)map.HEIGHT/perpendicular_wall_distance;
+        int start_y = map.HEIGHT/2 - line_height/2;
         int end_y = start_y + line_height;
 
         SDL_RenderDrawLineF(
