@@ -5,23 +5,24 @@
 
 Player::Player(float startx, float starty, float size) {
     rect = {startx, starty, size, size};
-    BASE_SPEED = 0.1;
+    BASE_SPEED = 2.5;
     speed = BASE_SPEED;
+    angle_rotation_speed = 0.05;
     angle = 0.0;
 }
 
 void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
     // check sprint
     if (keys->count(SDLK_RSHIFT) || keys->count(SDLK_LSHIFT)) {
-        speed = 4*BASE_SPEED;
+        speed = 2*BASE_SPEED;
     } else {
         speed = BASE_SPEED;
     }
     // update angle
     if (keys->count(SDLK_RIGHT)) {
-        angle += speed / 100.0;
+        angle += angle_rotation_speed;
     } else if (keys->count(SDLK_LEFT)) {
-        angle -= speed / 100.0;
+        angle -= angle_rotation_speed;
     }
     angle = normalize_angle(angle);
     // move

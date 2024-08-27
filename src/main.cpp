@@ -5,6 +5,7 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 
 #include <iostream>
 #include <set>
+#include <chrono>
 #include <SDL.h>
 #include "../include/player.hpp"
 
@@ -14,11 +15,13 @@ void handle_events(bool *running, std::set<SDL_Keycode> *keys);
 void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries);
 void render(SDL_Renderer* main_renderer, Player *player, const struct Map &map);
 void render_map(SDL_Renderer *main_renderer, const struct Map &map);
+uint64_t get_current_time(void);
+
 
 
 struct Map {
     static constexpr int TILE_SIZE = 32;
-    static constexpr int MAP_ROWS = 16;
+    static constexpr int MAP_ROWS = 20;
     static constexpr int MAP_COLUMNS = 16;
     static constexpr bool DATA[MAP_ROWS][MAP_COLUMNS] = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -29,14 +32,18 @@ struct Map {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
     };
 };
 
@@ -48,6 +55,8 @@ int main(void) {
     const int SCREEN_WIDTH = 1080;
     const int SCREEN_HEIGHT = 640;
     const struct Map map;
+    // debug var
+    bool DEBUG_FPS = false;
 
     // init sdl
     SDL_Window *window = nullptr;
@@ -57,17 +66,37 @@ int main(void) {
         return 1;
     }
 
+    // declare objects
     static Player player = Player(5.0, 5.0, (float)(map.TILE_SIZE/2));
-    std::set<SDL_Keycode> keys;
-    bool running = true;
-
     SDL_Rect boundaries = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    std::set<SDL_Keycode> keys;
+
+    // framerate limitation
+    uint64_t start_time;
+    uint64_t elapsed_time;
+    const uint FRAME_TIME = 1000/FPS;  // in milliseconds (~16.6)
 
     // mainloop
+    bool running = true;
     while (running) {
+        start_time = get_current_time();
+
         handle_events(&running, &keys);
         update(&player, &keys, &boundaries);
         render(main_renderer, &player, map);
+
+        // cap FPS to a max value (or a litter less FPS due to SDL_Delay aproximations)
+        elapsed_time = get_current_time() - start_time;
+        if (elapsed_time < FRAME_TIME) {
+            SDL_Delay((uint32_t)(FRAME_TIME - elapsed_time));
+        }
+        // debug fps
+        if (DEBUG_FPS) {
+        elapsed_time = get_current_time() - start_time;
+        float fps = 1000/elapsed_time;
+        std::cout << fps << '\n';
+}
+
     }
 
     // quit the game
@@ -189,8 +218,8 @@ void render_map(SDL_Renderer *main_renderer, const struct Map &map) {
                 SDL_SetRenderDrawColor(main_renderer, 0, 0, 0, 0); // transparent
             }
             SDL_Rect tile_rect = {
-                row_index*map.TILE_SIZE,
                 column_index*map.TILE_SIZE,
+                row_index*map.TILE_SIZE,
                 map.TILE_SIZE, map.TILE_SIZE
             };
             SDL_RenderFillRect(main_renderer, &tile_rect);
@@ -227,4 +256,11 @@ int sdl_init(SDL_Window **window, SDL_Renderer **main_renderer, int SCREEN_WIDTH
         return 1;
     }
     return 0;
+}
+
+uint64_t get_current_time(void) {
+    uint64_t time_now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+    return time_now;
 }

@@ -16,6 +16,7 @@ public:
 private:
     float BASE_SPEED;
     float speed;
+    float angle_rotation_speed;
     void collide_boundaries(SDL_Rect *boundaries);
     double normalize_angle(double angel);
 };
