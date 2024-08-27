@@ -15,6 +15,8 @@ public:
     // player direction vector
     double dir_x;
     double dir_y;
+    double plane_x;
+    double plane_y;
     void update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries);
     void render(SDL_Renderer *renderer);
 private:

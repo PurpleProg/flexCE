@@ -14,9 +14,19 @@ Player::Player(float startx, float starty, float size) {
 
     dir_x = 0.0;
     dir_y = 0.0;
+
+    plane_x = 0;
+    plane_y = 0.66;
 }
 
 void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
+    //   /!\  FOV tests
+    if (keys->count(SDLK_UP)) {
+        FOV += 1.0;
+    } else if (keys->count(SDLK_DOWN)) {
+        FOV -= 1.0;
+    }
+
     // check sprint
     if (keys->count(SDLK_RSHIFT) || keys->count(SDLK_LSHIFT)) {
         speed = 2*BASE_SPEED;
@@ -71,18 +81,24 @@ void Player::collide_boundaries(SDL_Rect *boundaries) {
 
 void Player::render(SDL_Renderer *renderer) {
 
+    // render player rect/hitbox
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);   // red
     SDL_RenderFillRectF(renderer, &rect);
 
-    // render the direction
+    // render the direction vector (multiplyed so it's not 1 pixel long lol)
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);  // yellow
+    float centerx = (rect.x + rect.w/2.0);
+    float centery = (rect.y + rect.h/2.0);
+    float dir_end_x = centerx + dir_x * (rect.w * 5);
+    float dir_ent_y = centery + dir_y * (rect.h * 5);
     SDL_RenderDrawLineF(
         renderer,
-        (rect.x + rect.w/2.0),
-        (rect.y + rect.h/2.0),
-        (rect.x + rect.w/2.0) + dir_x * 20,
-        (rect.y + rect.h/2.0) + dir_y * 20
+        centerx,
+        centery,
+        dir_end_x,
+        dir_ent_y
     );
+
 }
 
 

@@ -40,7 +40,7 @@ int main(void) {
     }
 
     // declare objects
-    static Player player = Player(5.0, 5.0, (float)(map.TILE_SIZE/2));
+    static Player player = Player(256.0, 256.0, (float)(map.TILE_SIZE/2));
     SDL_Rect boundaries = {0, 0, (map.TILE_SIZE*map.COLUMNS), (map.TILE_SIZE*map.ROWS)};
     std::set<SDL_Keycode> keys;
 
