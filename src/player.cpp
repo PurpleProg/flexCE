@@ -1,9 +1,10 @@
 #include <math.h>
+#include <keypadc.h>
 #include "../include/map.hpp"
 #include "../include/player.hpp"
 
 
-Player::Player(float startx, float starty, float size) {
+Player::Player(int startx, int starty, int size) {
     rect = {startx, starty, size, size};
     BASE_SPEED = 1.5;
 
@@ -18,52 +19,52 @@ Player::Player(float startx, float starty, float size) {
     plane_y = 0.66;
 }
 
-void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries, const struct Map &map) {
+void Player::update(Rect *boundaries, const struct Map &map) {
 
     // check sprint
-    if (keys->count(SDLK_RSHIFT) || keys->count(SDLK_LSHIFT)) {
+    if (kb_Data[1] & kb_2nd) {
         speed = 2*BASE_SPEED;
     } else {
         speed = BASE_SPEED;
     }
 
     // update angle and rotate plane
-    if (keys->count(SDLK_RIGHT)) {
+    if (kb_Data[7] & kb_Right) {
         angle += angle_rotation_speed;
         // update/rotate plane
         double old_plane_x = plane_x;
-        plane_x = old_plane_x * std::cos(angle_rotation_speed) - plane_y * std::sin(angle_rotation_speed);
-        plane_y = old_plane_x * std::sin(angle_rotation_speed) + plane_y * std::cos(angle_rotation_speed);
-    } else if (keys->count(SDLK_LEFT)) {
+        plane_x = old_plane_x * cos(angle_rotation_speed) - plane_y * sin(angle_rotation_speed);
+        plane_y = old_plane_x * sin(angle_rotation_speed) + plane_y * cos(angle_rotation_speed);
+    } else if (kb_Data[7] & kb_Left) {
         angle -= angle_rotation_speed;
         // update/rotate plane
         double old_plane_x = plane_x;
-        plane_x = old_plane_x * std::cos(-angle_rotation_speed) - plane_y * std::sin(-angle_rotation_speed);
-        plane_y = old_plane_x * std::sin(-angle_rotation_speed) + plane_y * std::cos(-angle_rotation_speed);
+        plane_x = old_plane_x * cos(-angle_rotation_speed) - plane_y * sin(-angle_rotation_speed);
+        plane_y = old_plane_x * sin(-angle_rotation_speed) + plane_y * cos(-angle_rotation_speed);
 
 
     }
     angle = normalize_angle(angle);
 
     // move
-    if (keys->count(SDLK_w)) {
-        rect.x += speed * std::cos(angle);
-        rect.y += speed * std::sin(angle);
-    } else if (keys->count(SDLK_s)) {
-        rect.x += speed * std::cos(angle - M_PI);
-        rect.y += speed * std::sin(angle - M_PI);
+    if (kb_Data[7] & kb_Up) {
+        rect.x += speed * cos(angle);
+        rect.y += speed * sin(angle);
+    } else if (kb_Data[7] & kb_Down) {
+        rect.x += speed * cos(angle - M_PI);
+        rect.y += speed * sin(angle - M_PI);
     }
-    if (keys->count(SDLK_d)) {
-        rect.x += speed * std::cos(angle + (M_PI / 2.0));
-        rect.y += speed * std::sin(angle + (M_PI / 2.0));
-    } else if (keys->count(SDLK_a)) {
-        rect.x += speed * std::cos(angle - (M_PI / 2.0));
-        rect.y += speed * std::sin(angle - (M_PI / 2.0));
+    if (kb_Data[4] & kb_LParen) {
+        rect.x += speed * cos(angle + (M_PI / 2.0));
+        rect.y += speed * sin(angle + (M_PI / 2.0));
+    } else if (kb_Data[5] & kb_RParen) {
+        rect.x += speed * cos(angle - (M_PI / 2.0));
+        rect.y += speed * sin(angle - (M_PI / 2.0));
     }
 
     // update direction
-    dir_x = std::cos(angle);
-    dir_y = std::sin(angle);
+    dir_x = cos(angle);
+    dir_y = sin(angle);
 
     // collide
     collide_boundaries(boundaries);
@@ -71,7 +72,7 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries, const str
 }
 
 
-void Player::collide_boundaries(SDL_Rect *boundaries) {
+void Player::collide_boundaries(Rect *boundaries) {
     // replace the player inside the boundaries
     // usualy {0, 0, SCREED_WIDTH, SCREEN_HEIGHT} for 2D rendering
     if ((rect.x + rect.w) > (boundaries->x + boundaries->w)) {rect.x = (boundaries->x + boundaries->w - rect.w);} // right
@@ -105,15 +106,15 @@ void Player::collide_map(const struct Map &map) {
                 float bottom_overlap = (rect.y + rect.h) - tile_top;
 
                 // resove based on the smallest overlap
-                if (std::min(right_overlap, left_overlap) < std::min(top_overlap, bottom_overlap)) {
-                    if (std::abs(right_overlap-left_overlap) < 2) {continue;}
+                if (fmin(right_overlap, left_overlap) < fmin(top_overlap, bottom_overlap)) {
+                    if (fabs(right_overlap-left_overlap) < 2) {continue;}
                     else if (right_overlap < left_overlap) {
                         rect.x = tile_left - rect.w;
                     } else {
                         rect.x = tile_right;
                     }
                 } else {
-                    if (std::abs(top_overlap-bottom_overlap) < 2) {continue;}
+                    if (fabs(top_overlap-bottom_overlap) < 2) {continue;}
                     else if (top_overlap < bottom_overlap) {
                         rect.y = tile_bottom;
                     } else {
@@ -124,29 +125,6 @@ void Player::collide_map(const struct Map &map) {
         // end of double for loop
         }
     }
-}
-
-
-void Player::render(SDL_Renderer *renderer) {
-
-    // render player rect/hitbox
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);   // red
-    SDL_RenderFillRectF(renderer, &rect);
-
-    // render the direction vector (multiplyed so it's not 1 pixel long lol)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);  // yellow
-    float centerx = (rect.x + rect.w/2.0);
-    float centery = (rect.y + rect.h/2.0);
-    float dir_end_x = centerx + dir_x * 20;
-    float dir_ent_y = centery + dir_y * 20;
-    SDL_RenderDrawLineF(
-        renderer,
-        centerx,
-        centery,
-        dir_end_x,
-        dir_ent_y
-    );
-
 }
 
 

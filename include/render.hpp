@@ -5,7 +5,7 @@
 #include "../include/map.hpp"
 
 
-void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map);
+void render_rays(Player *player, const struct Map &map);
 
 
 #endif

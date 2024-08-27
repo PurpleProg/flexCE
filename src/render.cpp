@@ -1,9 +1,8 @@
-#include <iostream>
-#include <SDL.h>
 #include "../include/render.hpp"
+#include <graphx.h>
 
 
-void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) {
+void render_rays(Player *player, const struct Map &map) {
     // cast a ray for each pixel on screen
     for (int x = 0; x<map.WIDTH; x++) {
         double camera_x = (x/(double)map.WIDTH * 2) -1;   // project world x in camera space (range -1 to 1)
@@ -15,8 +14,8 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         int8_t step_y;
 
         // calculate unit of distance
-        double unit_distance_x = std::abs(1/ray_dir_x);
-        double unit_distance_y = std::abs(1/ray_dir_y);
+        double unit_distance_x = abs(1/ray_dir_x);
+        double unit_distance_y = abs(1/ray_dir_y);
 
         // ray lenght. this is the euclidian distance, not a side. Or is it ?
         double ray_len_x = 0;
@@ -76,22 +75,17 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         double perpendicular_wall_distance;
         if (ray_hit_on_x_axis) {
             perpendicular_wall_distance = ray_len_x - unit_distance_x;
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            gfx_SetColor(0); // blue
         } else {
             perpendicular_wall_distance = ray_len_y - unit_distance_y;
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            gfx_SetColor(0);  // red
         }
 
         double line_height = (int)map.HEIGHT/perpendicular_wall_distance;
         int start_y = map.HEIGHT/2 - line_height/2;
-        int end_y = start_y + line_height;
 
-        SDL_RenderDrawLineF(
-            renderer,
-            x,
-            start_y,
-            x,
-            end_y
+        gfx_VertLine(
+            x, start_y, line_height
         );
     }
 }

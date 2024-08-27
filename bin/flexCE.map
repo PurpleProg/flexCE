@@ -1,0 +1,90 @@
+Section          Base   Top    High   Length
+---------------- ------ ------ ------ -------
+.icon            D1A882 D1A891             Fh
+.init.libs       D1A891 D1A8E9            58h
+.libs            D1A8E9 D1A91C            33h
+.init.clock      D1A91C D1A91C             0h
+.init.reruncheck D1A91C D1A91C             0h
+.init            D1A91C D1A946            2Ah
+.fini            D1A946 D1A97A            34h
+.text            D1A97A D1BAED          1173h
+.data            D1BAED D1BAF5             8h
+.rodata          D1BAF5 D1BD63           26Eh
+.init_array      000000 000000             0h
+.ctors           000000 000000             0h
+.dtors           000000 000000             0h
+.fini_array      000000 000000             0h
+.bss             D052C6 D052F3 D13FD8     2Dh
+.header          D1A87F D1A882             3h
+
+Label                                    Value
+--------------------------------------   ------
+___low_bss                             = D052C6
+___len_bss                             = 00002D
+___heaptop                             = D13FD8
+___heapbot                             = D052F3
+___libs                                = D1A8E9
+___init_array_count                    = 000000
+___ctors_count                         = 000000
+___dtors_count                         = 000000
+___fini_array_count                    = 000000
+__stack                                = D1A87E
+__fneg                                 = D1A97A
+__frameset                             = D1A987
+__frameset0                            = D1A995
+__imulu                                = D1A9A0
+__ishl                                 = D1A9D0
+__ixor                                 = D1A9F6
+__lcmpzero                             = D1AA0F
+__fadd                                 = 000270
+__fcmp                                 = 000274
+__fdiv                                 = 000278
+__fmul                                 = 000288
+__fsub                                 = 000290
+__ftol                                 = 00027C
+__ftoul                                = 00027C
+__ltof                                 = 000284
+__setflag                              = 000218
+__ultof                                = 000280
+__sand                                 = D1AA17
+_os_DisableHomeTextBuffer              = D1AA20
+_os_EnableHomeTextBuffer               = D1AA32
+_fminf                                 = D1AA44
+_cos                                   = 02211C
+_cosf                                  = 02211C
+_fabsf                                 = 0220F0
+__isnanf                               = D1AAAE
+_sinf                                  = 022118
+_sin                                   = 022118
+.missingappvar                         = D1BAF5
+.libloadname                           = D1BAFA
+.libloadnamelen                        = 000007
+.webaddress                            = D1BB02
+__start                                = D1A91C
+___exithl                              = D1A946
+skip._exit                             = D1A946
+skip.__Exit                            = D1A946
+skip._abort                            = D1A946
+_exit.sp                               = D1A947
+_exit.flash_wait_states                = D1A951
+_main                                  = D1AACA
+__Z6renderP6PlayerRK3Map               = D1ABA5
+__ZN6Player6updateEP4RectRK3Map        = D1AC11
+__ZN6Player15normalize_angleEd         = D1B28F
+__ZN6Player18collide_boundariesEP4Rect = D1B2D7
+__ZN6Player11collide_mapERK3Map        = D1B39C
+__Z11render_raysP6PlayerRK3Map         = D1B6DD
+_global_palette                        = D1BAED
+__ZZ4mainE6player                      = D052C6
+__ZGVZ4mainE6player                    = D052F2
+___const.main.boundaries               = D1BB17
+__ZN3Map4DATAE.const.7                 = D1BB23
+lib.LibLoad                            = D1A8E9
+_#gfx_Begin                            = D1A8FC
+_#gfx_SetColor                         = D1A900
+_#gfx_SetPalette                       = D1A904
+_#gfx_SetDraw                          = D1A908
+_#gfx_Blit                             = D1A90C
+_#gfx_VertLine                         = D1A910
+_#gfx_FillRectangle                    = D1A914
+_#gfx_ZeroScreen                       = D1A918
