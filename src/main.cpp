@@ -12,8 +12,33 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 int sdl_init(SDL_Window **window, SDL_Renderer **main_renderer, int SCREEN_WIDTH, int SCREEN_HEIGHT);
 void handle_events(bool *running, std::set<SDL_Keycode> *keys);
 void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries);
-void render(SDL_Renderer* main_renderer, Player *player, Map *map);
-void render_map(SDL_Renderer *main_renderer, Map *map);
+void render(SDL_Renderer* main_renderer, Player *player, const struct Map &map);
+void render_map(SDL_Renderer *main_renderer, const struct Map &map);
+
+
+struct Map {
+    static constexpr int TILE_SIZE = 32;
+    static constexpr int MAP_ROWS = 16;
+    static constexpr int MAP_COLUMNS = 16;
+    static constexpr bool DATA[MAP_ROWS][MAP_COLUMNS] = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+};
 
 
 int main(void) {
@@ -22,41 +47,17 @@ int main(void) {
     const int FPS = 60;
     const int SCREEN_WIDTH = 1080;
     const int SCREEN_HEIGHT = 640;
-    struct Map {
-        const int TILE_SIZE = 16;
-        const int MAP_ROWS = 16;
-        const int MAP_COLUMNS = 16;
-        const bool map_data[MAP_ROWS][MAP_COLUMNS] = {
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        };
-    };
-    const Map map;
-
+    const struct Map map;
 
     // init sdl
     SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
+    SDL_Renderer *main_renderer = nullptr;
     if (sdl_init(&window, &main_renderer, SCREEN_WIDTH, SCREEN_HEIGHT)) {
         std::cout << "sdl init failed" << '\n';
         return 1;
     }
 
-    static Player player = Player(5.0, 5.0, (float)TILE_SIZE);
+    static Player player = Player(5.0, 5.0, (float)(map.TILE_SIZE/2));
     std::set<SDL_Keycode> keys;
     bool running = true;
 
@@ -66,7 +67,7 @@ int main(void) {
     while (running) {
         handle_events(&running, &keys);
         update(&player, &keys, &boundaries);
-        render(main_renderer, &player, &map);
+        render(main_renderer, &player, map);
     }
 
     // quit the game
@@ -166,7 +167,7 @@ void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
 }
 
 
-void render(SDL_Renderer *main_renderer, Player *player, Map *map) {
+void render(SDL_Renderer *main_renderer, Player *player, const struct Map &map) {
     // clear the screen
     SDL_SetRenderDrawColor(main_renderer, 80, 10, 100, 255);  // deep purple
     SDL_RenderClear(main_renderer);
@@ -179,20 +180,20 @@ void render(SDL_Renderer *main_renderer, Player *player, Map *map) {
 }
 
 
-void render_map(SDL_Renderer *main_renderer, Map *map) {
-    for (int row_index = 0; row_index < map->MAP_ROWS; row_index++) {
-        for (int column_index = 0; column_index < map->MAP_COLUMNS; column_index++) {
-            if (map->map_data[row_index][column_index]) {
+void render_map(SDL_Renderer *main_renderer, const struct Map &map) {
+    for (int row_index = 0; row_index < map.MAP_ROWS; row_index++) {
+        for (int column_index = 0; column_index < map.MAP_COLUMNS; column_index++) {
+            if (map.DATA[row_index][column_index]) {
                 SDL_SetRenderDrawColor(main_renderer, 0, 0, 255, 255); // tile are blue
             } else {
                 SDL_SetRenderDrawColor(main_renderer, 0, 0, 0, 0); // transparent
             }
             SDL_Rect tile_rect = {
-                row_index*map->TILE_SIZE,
-                column_index*map->TILE_SIZE,
-                map->TILE_SIZE, map->TILE_SIZE
+                row_index*map.TILE_SIZE,
+                column_index*map.TILE_SIZE,
+                map.TILE_SIZE, map.TILE_SIZE
             };
-            SDL_RenderDrawRect(main_renderer, &tile_rect);
+            SDL_RenderFillRect(main_renderer, &tile_rect);
         }
     }
 }
