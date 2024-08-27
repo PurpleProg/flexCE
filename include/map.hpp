@@ -3,11 +3,11 @@
 
 
 struct Map {
-    static constexpr int TILE_SIZE = 32;
+    static constexpr int TILE_SIZE = 16;
     static constexpr int ROWS = 20;
     static constexpr int COLUMNS = 16;
-    static constexpr int WIDTH = TILE_SIZE * COLUMNS;
-    static constexpr int HEIGHT = TILE_SIZE * ROWS;
+    static constexpr int WIDTH = 320;
+    static constexpr int HEIGHT = 240;
     static constexpr bool DATA[ROWS][COLUMNS] = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},

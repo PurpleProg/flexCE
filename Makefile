@@ -15,15 +15,16 @@ clean:
 	@rm -rf out/* obj/*
 
 
-out/flexCE: $(OBJ) | out   ## create the executable from the objects
+out/flexCE: $(OBJ) include/%.hpp | out   ## create the executable from the objects
 	@echo "Linking objects..."
 	@$(CXX) $(OBJ) -o out/flexCE $(LDFLAGS)
 
+include/%.hpp:
+	@echo
 
 obj/%.o: src/%.cpp | obj     ## build the objects from the .cpp files  ($< is dependency, $@ is name)
 	@echo "Compiling $<..."
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
-
 
 
 out:   ## ensure the out dir exist

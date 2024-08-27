@@ -37,7 +37,7 @@ int main(void) {
 
     // declare objects
     static Player player = Player(256.0, 256.0, (float)(map.TILE_SIZE/2));
-    SDL_Rect boundaries = {0, 0, map.WIDTH, map.HEIGHT};
+    SDL_Rect boundaries = {0, 0, map.TILE_SIZE*map.COLUMNS, map.TILE_SIZE*map.ROWS};
     std::set<SDL_Keycode> keys;
 
     // framerate limitation
@@ -200,7 +200,7 @@ int sdl_init(
     }
     // declare the windows
     *window = SDL_CreateWindow(
-        "Look it's 3D baby !",
+        "flexCE",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         map.WIDTH, map.HEIGHT,
