@@ -176,15 +176,23 @@ void render(SDL_Renderer *renderer, SDL_Texture *texture_2d, SDL_Texture *textur
     SDL_SetRenderDrawColor(renderer, 80, 10, 100, 255);  // deep purple
     SDL_RenderClear(renderer);
 
-    // render in 3d
+    //////////////////// render in (fake) 3d /////////////
     SDL_SetRenderTarget(renderer, texture_3d);
-    // yes
-    SDL_SetRenderDrawColor(renderer, 100, 170, 250, 255);  // ligth blue
     SDL_RenderClear(renderer);
+    // draw sky
+    SDL_SetRenderDrawColor(renderer, 100, 170, 250, 255);  // ligth blue
+    SDL_Rect sky = {0, 0, map.TILE_SIZE*map.COLUMNS*2, map.TILE_SIZE*map.ROWS/2};
+    SDL_RenderFillRect(renderer, &sky);
+
+    // draw floor
+    SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);  // ligth grey
+    SDL_Rect floor = {0, map.TILE_SIZE*map.ROWS/2, map.TILE_SIZE*map.COLUMNS*2, map.TILE_SIZE*map.ROWS/2};
+    SDL_RenderFillRect(renderer, &floor);
+
     render_rays(renderer, player, map);
 
 
-    // render a 2D minimap
+    /////////////// render a 2D minimap //////////////
     SDL_SetRenderTarget(renderer, texture_2d);
     render_map(renderer, map);
     player->render(renderer);
@@ -193,6 +201,7 @@ void render(SDL_Renderer *renderer, SDL_Texture *texture_2d, SDL_Texture *textur
     // Reset render target to the default (window)
     SDL_SetRenderTarget(renderer, NULL);
 
+    // draw scennes to the window
     SDL_Rect dest_texture_2d = {
         0, 0,   // topleft
         map.TILE_SIZE*map.COLUMNS,
