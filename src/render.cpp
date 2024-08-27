@@ -27,7 +27,6 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
     // cast a ray for each pixel on screen
     const int WIDTH = map.TILE_SIZE*map.COLUMNS * 2;
     const int HEIGHT = map.TILE_SIZE*map.ROWS;
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 150);
     for (int x = 0; x<WIDTH; x++) {
         double camera_x = (x/(double)WIDTH * 2) -1;   // project world x in camera space (range -1 to 1)
         double ray_dir_x = player->dir_x + player->plane_x * camera_x;
@@ -45,9 +44,13 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         double ray_len_x = 0;
         double ray_len_y = 0;
 
+        // get player pos in map coordinates
+        double player_x_pos = (player->rect.x + (player->rect.w/2.0)) / map.TILE_SIZE;
+        double player_y_pos = (player->rect.y + (player->rect.h/2.0)) / map.TILE_SIZE;
+
         // get map position
-        int map_pos_x = int(player->rect.x + (player->rect.w/2.0));
-        int map_pos_y = int(player->rect.y + (player->rect.h/2.0));
+        int map_pos_x = int(player_x_pos);
+        int map_pos_y = int(player_y_pos);
 
         // if the ray hit with direction it is
         bool ray_hit = false;
@@ -57,17 +60,17 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         // calculate initial ray position
         if (ray_dir_x > 0) {  // right
             step_x = 1;
-            ray_len_x = (map_pos_x + 1 - (player->rect.x + (player->rect.w/2.0))) * unit_distance_x;
-        } else {
+            ray_len_x = (map_pos_x + 1 - player_x_pos) * unit_distance_x;
+        } else {    // left
             step_x = -1;
-            ray_len_x = ((player->rect.x + (player->rect.w/2)) - map_pos_x) * unit_distance_x;
+            ray_len_x = (player_x_pos - map_pos_x) * unit_distance_x;
         }
-        if (ray_dir_y > 0) {
+        if (ray_dir_y > 0) {   // down
             step_y = 1;
-            ray_len_y = (map_pos_y + 1 - (player->rect.y - (player->rect.h/2.0))) * unit_distance_y;
-        } else {
+            ray_len_y = (map_pos_y + 1 - player_y_pos) * unit_distance_y;
+        } else {   // up
             step_y = -1;
-            ray_len_y = ((player->rect.y - (player->rect.h/2.0)) - map_pos_y) * unit_distance_y;
+            ray_len_y = (player_y_pos - map_pos_y) * unit_distance_y;
         }
 
         // perform the DDA
@@ -87,11 +90,17 @@ void render_rays(SDL_Renderer *renderer, Player *player, const struct Map &map) 
         }
 
         // render the lines
-        double line_height;
-        if (ray_hit_on_x_axis) {line_height = (WIDTH * map.TILE_SIZE)/ray_len_x;}
-        else {line_height = (WIDTH * map.TILE_SIZE)/ray_len_y;}
+        double perpendicular_wall_distance;
+        if (ray_hit_on_x_axis) {
+            perpendicular_wall_distance = ray_len_x - unit_distance_x;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        } else {
+            perpendicular_wall_distance = ray_len_y - unit_distance_y;
+            SDL_SetRenderDrawColor(renderer, 100, 0, 0, 255);
+        }
 
-        int start_y = HEIGHT/2 - line_height-2;
+        double line_height = (int)HEIGHT/perpendicular_wall_distance;
+        int start_y = HEIGHT/2 - line_height/2;
         int end_y = start_y + line_height;
 
         SDL_RenderDrawLineF(

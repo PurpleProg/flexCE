@@ -20,12 +20,6 @@ Player::Player(float startx, float starty, float size) {
 }
 
 void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
-    //   /!\  FOV tests
-    if (keys->count(SDLK_UP)) {
-        FOV += 1.0;
-    } else if (keys->count(SDLK_DOWN)) {
-        FOV -= 1.0;
-    }
 
     // check sprint
     if (keys->count(SDLK_RSHIFT) || keys->count(SDLK_LSHIFT)) {
@@ -37,8 +31,18 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
     // update angle
     if (keys->count(SDLK_RIGHT)) {
         angle += angle_rotation_speed;
+        // update/rotate plane
+        double old_plane_x = plane_x;
+        plane_x = old_plane_x * std::cos(angle_rotation_speed) - plane_y * std::sin(angle_rotation_speed);
+        plane_y = old_plane_x * std::sin(angle_rotation_speed) + plane_y * std::cos(angle_rotation_speed);
     } else if (keys->count(SDLK_LEFT)) {
         angle -= angle_rotation_speed;
+        // update/rotate plane
+        double old_plane_x = plane_x;
+        plane_x = old_plane_x * std::cos(-angle_rotation_speed) - plane_y * std::sin(-angle_rotation_speed);
+        plane_y = old_plane_x * std::sin(-angle_rotation_speed) + plane_y * std::cos(-angle_rotation_speed);
+
+
     }
     angle = normalize_angle(angle);
 
@@ -58,9 +62,7 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
         rect.y += speed * std::sin(angle - (M_PI / 2.0));
     }
 
-    //update direction
-    // dir_x = (rect.x + rect.w/2.0) + std::cos(angle);
-    // dir_y = (rect.y + rect.h/2.0) + std::sin(angle);
+    // update direction
     dir_x = std::cos(angle);
     dir_y = std::sin(angle);
 
@@ -89,8 +91,8 @@ void Player::render(SDL_Renderer *renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);  // yellow
     float centerx = (rect.x + rect.w/2.0);
     float centery = (rect.y + rect.h/2.0);
-    float dir_end_x = centerx + dir_x * (rect.w * 5);
-    float dir_ent_y = centery + dir_y * (rect.h * 5);
+    float dir_end_x = centerx + std::cos(angle) * 30;
+    float dir_ent_y = centery + std::sin(angle) * 30;
     SDL_RenderDrawLineF(
         renderer,
         centerx,
