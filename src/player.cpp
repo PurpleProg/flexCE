@@ -5,9 +5,7 @@
 
 Player::Player(float startx, float starty, float size) {
     rect = {startx, starty, size, size};
-    prev_rect = rect;
-    BASE_SPEED = 2.5;
-    FOV = 60.0;
+    BASE_SPEED = 1.5;
 
     speed = BASE_SPEED;
     angle_rotation_speed = 0.05;
@@ -21,8 +19,6 @@ Player::Player(float startx, float starty, float size) {
 }
 
 void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries, const struct Map &map) {
-
-    prev_rect = rect;
 
     // check sprint
     if (keys->count(SDLK_RSHIFT) || keys->count(SDLK_LSHIFT)) {
@@ -88,35 +84,44 @@ void Player::collide_boundaries(SDL_Rect *boundaries) {
 void Player::collide_map(const struct Map &map) {
     for (int row_index = 0; row_index < map.ROWS; row_index++) {
         for (int column_index = 0; column_index < map.COLUMNS; column_index++) {
-            if (map.DATA[row_index][column_index]) {
-                // check rect collision
-                if (rect.x + rect.w > column_index*map.TILE_SIZE && rect.x < (column_index + 1)*map.TILE_SIZE) {
-                    // x collision
-                    if (rect.y + rect.h > row_index*map.TILE_SIZE && rect.y < (row_index + 1)*map.TILE_SIZE) {
-                        // y collision too
-                        float delta_x = std::abs(rect.x - column_index*map.TILE_SIZE);
-                        float delta_y = std::abs(rect.y - row_index*map.TILE_SIZE);
-                        if (delta_x > delta_y) {
-                            // from y axis
-                            if ((rect.y - prev_rect.y) > 0) {
-                                // from top
-                                rect.y = row_index*map.TILE_SIZE - rect.h;
-                            } else {
-                                // from bottom
-                                rect.y = row_index*map.TILE_SIZE + rect.h;
-                            }
-                        } else {
-                            // form x axis
-                            if ((rect.x - prev_rect.x) > 0) {
-                                // from left
-                                rect.x = column_index*map.TILE_SIZE - rect.w;
-                            } else { // from the right
-                                rect.x = column_index*map.TILE_SIZE + rect.w;
-                            }
-                        }
+            if (
+                map.DATA[row_index][column_index] &&
+                rect.x + rect.w > column_index*map.TILE_SIZE &&
+                rect.x < (column_index + 1)*map.TILE_SIZE &&
+                rect.y + rect.h > row_index*map.TILE_SIZE &&
+                rect.y < (row_index + 1)*map.TILE_SIZE
+            ) {
+
+                // get tile rect values
+                float tile_left = column_index * map.TILE_SIZE;
+                float tile_right = tile_left + map.TILE_SIZE;
+                float tile_top = row_index * map.TILE_SIZE;
+                float tile_bottom = tile_top + map.TILE_SIZE;
+
+                // get overlaps for each direction
+                float right_overlap = (rect.x + rect.w) - tile_left;
+                float left_overlap = tile_right - rect.x;
+                float top_overlap = tile_bottom - rect.y;
+                float bottom_overlap = (rect.y + rect.h) - tile_top;
+
+                // resove based on the smallest overlap
+                if (std::min(right_overlap, left_overlap) < std::min(top_overlap, bottom_overlap)) {
+                    if (std::abs(right_overlap-left_overlap) < 2) {continue;}
+                    else if (right_overlap < left_overlap) {
+                        rect.x = tile_left - rect.w;
+                    } else {
+                        rect.x = tile_right;
+                    }
+                } else {
+                    if (std::abs(top_overlap-bottom_overlap) < 2) {continue;}
+                    else if (top_overlap < bottom_overlap) {
+                        rect.y = tile_bottom;
+                    } else {
+                        rect.y = tile_top - rect.h;
                     }
                 }
             }
+        // end of double for loop
         }
     }
 }

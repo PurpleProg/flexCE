@@ -11,9 +11,7 @@ public:
     Player(float startx, float starty, float size);
 
     SDL_FRect rect;
-    SDL_FRect prev_rect;
     double angle;
-    float FOV;
     // player direction vector
     double dir_x;
     double dir_y;

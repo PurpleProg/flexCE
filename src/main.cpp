@@ -24,8 +24,6 @@ int main(void) {
     // constant declaration
     const int FPS = 60;
     const struct Map map;
-    // debug var
-    bool DEBUG_FPS = false;
 
     // init sdl
     SDL_Window *window = nullptr;
@@ -59,13 +57,6 @@ int main(void) {
         if (elapsed_time < FRAME_TIME) {
             SDL_Delay((uint32_t)(FRAME_TIME - elapsed_time));
         }
-        // debug fps
-        if (DEBUG_FPS) {
-        elapsed_time = get_current_time() - start_time;
-        float fps = 1000/elapsed_time;
-        // std::cout << fps << '\n';
-        }
-
     }
 
     // quit the game
