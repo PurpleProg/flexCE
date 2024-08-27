@@ -6,9 +6,14 @@
 Player::Player(float startx, float starty, float size) {
     rect = {startx, starty, size, size};
     BASE_SPEED = 2.5;
+    FOV = 60.0;
+
     speed = BASE_SPEED;
     angle_rotation_speed = 0.05;
     angle = 0.0;
+
+    dir_x = 0.0;
+    dir_y = 0.0;
 }
 
 void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
@@ -18,6 +23,7 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
     } else {
         speed = BASE_SPEED;
     }
+
     // update angle
     if (keys->count(SDLK_RIGHT)) {
         angle += angle_rotation_speed;
@@ -25,6 +31,7 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
         angle -= angle_rotation_speed;
     }
     angle = normalize_angle(angle);
+
     // move
     if (keys->count(SDLK_w)) {
         rect.x += speed * std::cos(angle);
@@ -40,6 +47,13 @@ void Player::update(std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
         rect.x += speed * std::cos(angle - (M_PI / 2.0));
         rect.y += speed * std::sin(angle - (M_PI / 2.0));
     }
+
+    //update direction
+    // dir_x = (rect.x + rect.w/2.0) + std::cos(angle);
+    // dir_y = (rect.y + rect.h/2.0) + std::sin(angle);
+    dir_x = std::cos(angle);
+    dir_y = std::sin(angle);
+
     // collide
     collide_boundaries(boundaries);
 }
@@ -57,21 +71,18 @@ void Player::collide_boundaries(SDL_Rect *boundaries) {
 
 void Player::render(SDL_Renderer *renderer) {
 
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);   // red
     SDL_RenderFillRectF(renderer, &rect);
 
-    // render a line for the angle dir
+    // render the direction
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);  // yellow
-    float rect_center_x = rect.x + rect.w/2.0;
-    float rect_center_y = rect.y + rect.h/2.0;
-    float end_x = rect_center_x + (2*rect.w) * std::cos(angle);
-    float end_y = rect_center_y + (2*rect.w) * std::sin(angle);
     SDL_RenderDrawLineF(
         renderer,
-        rect_center_x, rect_center_y,
-        end_x, end_y
+        (rect.x + rect.w/2.0),
+        (rect.y + rect.h/2.0),
+        (rect.x + rect.w/2.0) + dir_x * 20,
+        (rect.y + rect.h/2.0) + dir_y * 20
     );
-
 }
 
 

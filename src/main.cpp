@@ -8,51 +8,22 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 #include <chrono>
 #include <SDL.h>
 #include "../include/player.hpp"
+#include "../include/render.hpp"
 
 
-int sdl_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture_2d, SDL_Texture **texture_3d, int SCREEN_WIDTH, int SCREEN_HEIGHT);
+int sdl_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture_2d, SDL_Texture **texture_3d, int SCREEN_WIDTH, int SCREEN_HEIGHT, const struct Map &map);
+uint64_t get_current_time(void);
+
 void handle_events(bool *running, std::set<SDL_Keycode> *keys);
 void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries);
 void render(SDL_Renderer* renderer, SDL_Texture *texture_2d, SDL_Texture *texture_3d, Player *player, const struct Map &map);
-void render_map(SDL_Renderer *renderer, const struct Map &map);
-uint64_t get_current_time(void);
-
-
-
-struct Map {
-    static constexpr int TILE_SIZE = 32;
-    static constexpr int ROWS = 20;
-    static constexpr int COLUMNS = 16;
-    static constexpr bool DATA[ROWS][COLUMNS] = {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
-    };
-};
 
 
 int main(void) {
 
     // constant declaration
     const int FPS = 60;
-    const int SCREEN_WIDTH = 1024;
+    const int SCREEN_WIDTH = 1024 + 512;
     const int SCREEN_HEIGHT = 640;
     const struct Map map;
     // debug var
@@ -63,7 +34,7 @@ int main(void) {
     SDL_Renderer *renderer = nullptr;
     SDL_Texture *texture_2d = nullptr;
     SDL_Texture *texture_3d = nullptr;
-    if (sdl_init(&window, &renderer, &texture_2d, &texture_3d, SCREEN_WIDTH, SCREEN_HEIGHT)) {
+    if (sdl_init(&window, &renderer, &texture_2d, &texture_3d, SCREEN_WIDTH, SCREEN_HEIGHT, map)) {
         std::cout << "sdl init failed" << '\n';
         return 1;
     }
@@ -206,24 +177,35 @@ void render(SDL_Renderer *renderer, SDL_Texture *texture_2d, SDL_Texture *textur
     SDL_RenderClear(renderer);
 
     // render in 3d
-    // SDL_SetRenderTarget(renderer, texture_3d);
+    SDL_SetRenderTarget(renderer, texture_3d);
     // yes
+    SDL_SetRenderDrawColor(renderer, 100, 170, 250, 255);  // ligth blue
+    SDL_RenderClear(renderer);
 
 
     // render a 2D minimap
     SDL_SetRenderTarget(renderer, texture_2d);
     render_map(renderer, map);
+    render_rays(renderer, player, map);
     player->render(renderer);
 
 
     // Reset render target to the default (window)
     SDL_SetRenderTarget(renderer, NULL);
 
-    SDL_Rect dest_texture_3d = {0, 0, map.TILE_SIZE*map.COLUMNS, map.TILE_SIZE*map.ROWS};  // Example destination rect for the 3D scene
-    SDL_RenderCopy(renderer, texture_3d, NULL, &dest_texture_3d);
-
-    SDL_Rect dest_texture_2d = {0, 0, 512, 640};  // Example destination rect for the minimap
+    SDL_Rect dest_texture_2d = {
+        0, 0,   // topleft
+        map.TILE_SIZE*map.COLUMNS,
+        map.TILE_SIZE*map.ROWS
+    };
     SDL_RenderCopy(renderer, texture_2d, NULL, &dest_texture_2d);
+
+    SDL_Rect dest_texture_3d = {
+        map.TILE_SIZE*map.COLUMNS, 0,    // topleft
+        map.TILE_SIZE*map.COLUMNS * 2,   // width
+        map.TILE_SIZE*map.ROWS           // height
+    };
+    SDL_RenderCopy(renderer, texture_3d, NULL, &dest_texture_3d);
 
 
     // update the screen
@@ -231,26 +213,15 @@ void render(SDL_Renderer *renderer, SDL_Texture *texture_2d, SDL_Texture *textur
 }
 
 
-void render_map(SDL_Renderer *renderer, const struct Map &map) {
-    for (int row_index = 0; row_index < map.ROWS; row_index++) {
-        for (int column_index = 0; column_index < map.COLUMNS; column_index++) {
-            if (map.DATA[row_index][column_index]) {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // tile are blue
-            } else {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); // transparent
-            }
-            SDL_Rect tile_rect = {
-                column_index*map.TILE_SIZE,
-                row_index*map.TILE_SIZE,
-                map.TILE_SIZE, map.TILE_SIZE
-            };
-            SDL_RenderFillRect(renderer, &tile_rect);
-        }
-    }
-}
-
-
-int sdl_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture_2d, SDL_Texture **texture_3d, int SCREEN_WIDTH, int SCREEN_HEIGHT) {
+int sdl_init(
+    SDL_Window **window,
+    SDL_Renderer **renderer,
+    SDL_Texture **texture_2d,
+    SDL_Texture **texture_3d,
+    int SCREEN_WIDTH,
+    int SCREEN_HEIGHT,
+    const struct Map &map
+) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cout << "sld init error : " << SDL_GetError() << '\n';
         return 1;
@@ -282,8 +253,8 @@ int sdl_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture
         *renderer,
         SDL_PIXELFORMAT_RGBA4444,  // pixel format, 4 bits range from 0 to 255.
         SDL_TEXTUREACCESS_TARGET,  // texture acces, ot be a target for the renderer
-        SCREEN_WIDTH/2,
-        SCREEN_HEIGHT
+        map.TILE_SIZE*map.COLUMNS,
+        map.TILE_SIZE*map.ROWS
     );
     if (*texture_2d == NULL) {
         std::cout << "texture_2d creation failed" << SDL_GetError() << '\n';
@@ -293,8 +264,8 @@ int sdl_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture
         *renderer,
         SDL_PIXELFORMAT_RGBA4444,  // pixel format, 4 bits range from 0 to 255.
         SDL_TEXTUREACCESS_TARGET,  // texture acces, ot be a target for the renderer
-        SCREEN_WIDTH/2,
-        SCREEN_HEIGHT
+        map.TILE_SIZE*map.COLUMNS * 2,
+        map.TILE_SIZE*map.ROWS
     );
     if (*texture_3d == NULL) {
         std::cout << "texture_3d creation failed" << SDL_GetError() << '\n';
