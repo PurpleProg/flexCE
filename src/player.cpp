@@ -58,7 +58,7 @@ void Player::collide_boundaries(SDL_Rect *boundaries) {
 void Player::render(SDL_Renderer *renderer) {
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRectF(renderer, &rect);
+    SDL_RenderFillRectF(renderer, &rect);
 
     // render a line for the angle dir
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);  // yellow

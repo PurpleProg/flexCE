@@ -10,20 +10,20 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 #include "../include/player.hpp"
 
 
-int sdl_init(SDL_Window **window, SDL_Renderer **main_renderer, int SCREEN_WIDTH, int SCREEN_HEIGHT);
+int sdl_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture_2d, SDL_Texture **texture_3d, int SCREEN_WIDTH, int SCREEN_HEIGHT);
 void handle_events(bool *running, std::set<SDL_Keycode> *keys);
 void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries);
-void render(SDL_Renderer* main_renderer, Player *player, const struct Map &map);
-void render_map(SDL_Renderer *main_renderer, const struct Map &map);
+void render(SDL_Renderer* renderer, SDL_Texture *texture_2d, SDL_Texture *texture_3d, Player *player, const struct Map &map);
+void render_map(SDL_Renderer *renderer, const struct Map &map);
 uint64_t get_current_time(void);
 
 
 
 struct Map {
     static constexpr int TILE_SIZE = 32;
-    static constexpr int MAP_ROWS = 20;
-    static constexpr int MAP_COLUMNS = 16;
-    static constexpr bool DATA[MAP_ROWS][MAP_COLUMNS] = {
+    static constexpr int ROWS = 20;
+    static constexpr int COLUMNS = 16;
+    static constexpr bool DATA[ROWS][COLUMNS] = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -52,7 +52,7 @@ int main(void) {
 
     // constant declaration
     const int FPS = 60;
-    const int SCREEN_WIDTH = 1080;
+    const int SCREEN_WIDTH = 1024;
     const int SCREEN_HEIGHT = 640;
     const struct Map map;
     // debug var
@@ -60,15 +60,17 @@ int main(void) {
 
     // init sdl
     SDL_Window *window = nullptr;
-    SDL_Renderer *main_renderer = nullptr;
-    if (sdl_init(&window, &main_renderer, SCREEN_WIDTH, SCREEN_HEIGHT)) {
+    SDL_Renderer *renderer = nullptr;
+    SDL_Texture *texture_2d = nullptr;
+    SDL_Texture *texture_3d = nullptr;
+    if (sdl_init(&window, &renderer, &texture_2d, &texture_3d, SCREEN_WIDTH, SCREEN_HEIGHT)) {
         std::cout << "sdl init failed" << '\n';
         return 1;
     }
 
     // declare objects
     static Player player = Player(5.0, 5.0, (float)(map.TILE_SIZE/2));
-    SDL_Rect boundaries = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect boundaries = {0, 0, (map.TILE_SIZE*map.COLUMNS), (map.TILE_SIZE*map.ROWS)};
     std::set<SDL_Keycode> keys;
 
     // framerate limitation
@@ -83,7 +85,7 @@ int main(void) {
 
         handle_events(&running, &keys);
         update(&player, &keys, &boundaries);
-        render(main_renderer, &player, map);
+        render(renderer, texture_2d, texture_3d, &player, map);
 
         // cap FPS to a max value (or a litter less FPS due to SDL_Delay aproximations)
         elapsed_time = get_current_time() - start_time;
@@ -95,12 +97,14 @@ int main(void) {
         elapsed_time = get_current_time() - start_time;
         float fps = 1000/elapsed_time;
         std::cout << fps << '\n';
-}
+        }
 
     }
 
     // quit the game
-    SDL_DestroyRenderer(main_renderer);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyTexture(texture_2d);
+    SDL_DestroyTexture(texture_3d);
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
@@ -196,39 +200,57 @@ void update(Player *player, std::set<SDL_Keycode> *keys, SDL_Rect *boundaries) {
 }
 
 
-void render(SDL_Renderer *main_renderer, Player *player, const struct Map &map) {
+void render(SDL_Renderer *renderer, SDL_Texture *texture_2d, SDL_Texture *texture_3d, Player *player, const struct Map &map) {
     // clear the screen
-    SDL_SetRenderDrawColor(main_renderer, 80, 10, 100, 255);  // deep purple
-    SDL_RenderClear(main_renderer);
+    SDL_SetRenderDrawColor(renderer, 80, 10, 100, 255);  // deep purple
+    SDL_RenderClear(renderer);
 
-    render_map(main_renderer, map);
-    player->render(main_renderer);
+    // render in 3d
+    // SDL_SetRenderTarget(renderer, texture_3d);
+    // yes
+
+
+    // render a 2D minimap
+    SDL_SetRenderTarget(renderer, texture_2d);
+    render_map(renderer, map);
+    player->render(renderer);
+
+
+    // Reset render target to the default (window)
+    SDL_SetRenderTarget(renderer, NULL);
+
+    SDL_Rect dest_texture_3d = {0, 0, map.TILE_SIZE*map.COLUMNS, map.TILE_SIZE*map.ROWS};  // Example destination rect for the 3D scene
+    SDL_RenderCopy(renderer, texture_3d, NULL, &dest_texture_3d);
+
+    SDL_Rect dest_texture_2d = {0, 0, 512, 640};  // Example destination rect for the minimap
+    SDL_RenderCopy(renderer, texture_2d, NULL, &dest_texture_2d);
+
 
     // update the screen
-    SDL_RenderPresent(main_renderer);
+    SDL_RenderPresent(renderer);
 }
 
 
-void render_map(SDL_Renderer *main_renderer, const struct Map &map) {
-    for (int row_index = 0; row_index < map.MAP_ROWS; row_index++) {
-        for (int column_index = 0; column_index < map.MAP_COLUMNS; column_index++) {
+void render_map(SDL_Renderer *renderer, const struct Map &map) {
+    for (int row_index = 0; row_index < map.ROWS; row_index++) {
+        for (int column_index = 0; column_index < map.COLUMNS; column_index++) {
             if (map.DATA[row_index][column_index]) {
-                SDL_SetRenderDrawColor(main_renderer, 0, 0, 255, 255); // tile are blue
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // tile are blue
             } else {
-                SDL_SetRenderDrawColor(main_renderer, 0, 0, 0, 0); // transparent
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); // transparent
             }
             SDL_Rect tile_rect = {
                 column_index*map.TILE_SIZE,
                 row_index*map.TILE_SIZE,
                 map.TILE_SIZE, map.TILE_SIZE
             };
-            SDL_RenderFillRect(main_renderer, &tile_rect);
+            SDL_RenderFillRect(renderer, &tile_rect);
         }
     }
 }
 
 
-int sdl_init(SDL_Window **window, SDL_Renderer **main_renderer, int SCREEN_WIDTH, int SCREEN_HEIGHT) {
+int sdl_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture_2d, SDL_Texture **texture_3d, int SCREEN_WIDTH, int SCREEN_HEIGHT) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cout << "sld init error : " << SDL_GetError() << '\n';
         return 1;
@@ -245,18 +267,43 @@ int sdl_init(SDL_Window **window, SDL_Renderer **main_renderer, int SCREEN_WIDTH
         std::cout << "windows creation failed" << SDL_GetError() << '\n';
         return 1;
     }
-    // declare the main_renderer (wtf is that :cry:)
-    *main_renderer = SDL_CreateRenderer(
+    // declare the renderer (wtf is that :cry:)
+    *renderer = SDL_CreateRenderer(
         *window,
         -1,
         SDL_RENDERER_ACCELERATED
     );
-    if (*main_renderer == NULL) {
-        std::cout << "main_renderer creation failed" << SDL_GetError() << '\n';
+    if (*renderer == NULL) {
+        std::cout << "renderer creation failed" << SDL_GetError() << '\n';
         return 1;
     }
+    // declare the textures (targets for the renderer)
+    *texture_2d = SDL_CreateTexture(
+        *renderer,
+        SDL_PIXELFORMAT_RGBA4444,  // pixel format, 4 bits range from 0 to 255.
+        SDL_TEXTUREACCESS_TARGET,  // texture acces, ot be a target for the renderer
+        SCREEN_WIDTH/2,
+        SCREEN_HEIGHT
+    );
+    if (*texture_2d == NULL) {
+        std::cout << "texture_2d creation failed" << SDL_GetError() << '\n';
+        return 1;
+    }
+    *texture_3d = SDL_CreateTexture(
+        *renderer,
+        SDL_PIXELFORMAT_RGBA4444,  // pixel format, 4 bits range from 0 to 255.
+        SDL_TEXTUREACCESS_TARGET,  // texture acces, ot be a target for the renderer
+        SCREEN_WIDTH/2,
+        SCREEN_HEIGHT
+    );
+    if (*texture_3d == NULL) {
+        std::cout << "texture_3d creation failed" << SDL_GetError() << '\n';
+        return 1;
+    }
+
     return 0;
 }
+
 
 uint64_t get_current_time(void) {
     uint64_t time_now = std::chrono::duration_cast<std::chrono::milliseconds>(
