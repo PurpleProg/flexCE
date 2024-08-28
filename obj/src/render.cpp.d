@@ -4,4 +4,5 @@ obj/src/render.cpp.bc: src/render.cpp src/../include/render.hpp \
   /home/marcel/dev/TI83PCE/CEdev/include/stdint.h \
   /home/marcel/dev/TI83PCE/CEdev/include/cdefs.h \
   /home/marcel/dev/TI83PCE/CEdev/include/stdlib.h \
-  /home/marcel/dev/TI83PCE/CEdev/include/stdbool.h
+  /home/marcel/dev/TI83PCE/CEdev/include/stdbool.h \
+  /home/marcel/dev/TI83PCE/CEdev/include/math.h

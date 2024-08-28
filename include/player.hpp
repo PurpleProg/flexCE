@@ -15,13 +15,12 @@ public:
     double dir_y;
     double plane_x;
     double plane_y;
-    void update(Rect *boundaries, const struct Map &map);
+    void update(const struct Map &map);
     void render();
 private:
     float BASE_SPEED;
     float speed;
     float angle_rotation_speed;
-    void collide_boundaries(Rect *boundaries);
     void collide_map(const struct Map &map);
     double normalize_angle(double angel);
 };

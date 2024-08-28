@@ -19,7 +19,7 @@ Player::Player(int startx, int starty, int size) {
     plane_y = 0.66;
 }
 
-void Player::update(Rect *boundaries, const struct Map &map) {
+void Player::update(const struct Map &map) {
 
     // check sprint
     if (kb_Data[1] & kb_2nd) {
@@ -67,18 +67,7 @@ void Player::update(Rect *boundaries, const struct Map &map) {
     dir_y = sin(angle);
 
     // collide
-    collide_boundaries(boundaries);
     collide_map(map);
-}
-
-
-void Player::collide_boundaries(Rect *boundaries) {
-    // replace the player inside the boundaries
-    // usualy {0, 0, SCREED_WIDTH, SCREEN_HEIGHT} for 2D rendering
-    if ((rect.x + rect.w) > (boundaries->x + boundaries->w)) {rect.x = (boundaries->x + boundaries->w - rect.w);} // right
-    if (rect.x < boundaries->x) {rect.x = boundaries->x;} // left
-    if ((rect.y + rect.h) > (boundaries->y + boundaries->h)) {rect.y = (boundaries->y + boundaries->h - rect.h);} // bottom
-    if (rect.y < boundaries->y) {rect.y = boundaries->y;}     // top
 }
 
 

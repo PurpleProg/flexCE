@@ -1,5 +1,6 @@
 #include "../include/render.hpp"
 #include <graphx.h>
+#include <math.h>
 
 
 void render_rays(Player *player, const struct Map &map) {
@@ -14,8 +15,8 @@ void render_rays(Player *player, const struct Map &map) {
         int8_t step_y;
 
         // calculate unit of distance
-        double unit_distance_x = abs(1/ray_dir_x);
-        double unit_distance_y = abs(1/ray_dir_y);
+        double unit_distance_x = fabs(1/ray_dir_x);
+        double unit_distance_y = fabs(1/ray_dir_y);
 
         // ray lenght. this is the euclidian distance, not a side. Or is it ?
         double ray_len_x = 0;
@@ -75,10 +76,10 @@ void render_rays(Player *player, const struct Map &map) {
         double perpendicular_wall_distance;
         if (ray_hit_on_x_axis) {
             perpendicular_wall_distance = ray_len_x - unit_distance_x;
-            gfx_SetColor(0); // blue
+            gfx_SetColor(3); // blue
         } else {
             perpendicular_wall_distance = ray_len_y - unit_distance_y;
-            gfx_SetColor(0);  // red
+            gfx_SetColor(2);  // red
         }
 
         double line_height = (int)map.HEIGHT/perpendicular_wall_distance;

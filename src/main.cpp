@@ -4,16 +4,14 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 */
 
 #include <graphx.h>
+#include <keypadc.h>
 #include "gfx/gfx.h"
 #include "../include/render.hpp"
 #include "../include/player.hpp"
 #include "../include/map.hpp"
 
 
-uint64_t get_current_time(void);
-
-void handle_events(bool *running);
-void update(Player *player, Rect *boundaries, const struct Map &map);
+void update(Player *player, const struct Map &map);
 void render(Player *player, const struct Map &map);
 
 
@@ -30,22 +28,25 @@ int main(void) {
 
     // declare objects
     static Player player = Player(256, 256, map.TILE_SIZE/2);
-    Rect boundaries = {0, 0, map.TILE_SIZE*map.COLUMNS, map.TILE_SIZE*map.ROWS};
 
 
     // mainloop
     bool running = true;
     while (running) {
-        update(&player, &boundaries, map);
+        update(&player, map);
         render(&player, map);
+        if (kb_Data[1] & kb_Del) {
+            running = false;
+            gfx_End();
+        }
     }
 
-    // quit the game
+    gfx_End();
     return 0;
 }
 
-void update(Player *player, Rect *boundaries, const struct Map &map) {
-    player->update(boundaries, map);
+void update(Player *player, const struct Map &map) {
+    player->update(map);
 }
 
 
@@ -55,7 +56,7 @@ void render(Player *player, const struct Map &map) {
 
 
     // draw sky
-    gfx_SetColor(0);
+    gfx_SetColor(5);  // light blue
     gfx_FillRectangle(
         0,
         0,
@@ -64,10 +65,10 @@ void render(Player *player, const struct Map &map) {
     );
 
     // draw floor
-    gfx_SetColor(0);
+    gfx_SetColor(4);  // light grey
     gfx_FillRectangle(
-        map.HEIGHT/2,
         0,
+        map.HEIGHT/2,
         map.WIDTH,
         map.HEIGHT/2
     );
@@ -76,5 +77,6 @@ void render(Player *player, const struct Map &map) {
     render_rays(player, map);
 
     // update the screen
+    // gfx_SwapDraw();
     gfx_BlitBuffer();
 }
