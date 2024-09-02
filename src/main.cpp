@@ -11,7 +11,7 @@ writen in C++ with SDL, it aim to be ported to the TI83 Premium CE (not hapennin
 #include "../include/map.hpp"
 
 
-void update(Player *player, const struct Map &map);
+void update(Player *player, kb_key_t *key, const struct Map &map);
 void render(Player *player, const struct Map &map);
 
 
@@ -28,25 +28,24 @@ int main(void) {
 
     // declare objects
     static Player player = Player(256, 256, map.TILE_SIZE/2);
+    kb_key_t key;
 
 
     // mainloop
-    bool running = true;
-    while (running) {
-        update(&player, map);
-        render(&player, map);
-        if (kb_Data[1] & kb_Del) {
-            running = false;
-            gfx_End();
-        }
-    }
+    do {
+      kb_Scan();
+      key = kb_Data[7];
+      update(&player, &key, map);
+      render(&player, map);
+    } while (kb_Data[1] != kb_Del);
+
 
     gfx_End();
     return 0;
 }
 
-void update(Player *player, const struct Map &map) {
-    player->update(map);
+void update(Player *player, kb_key_t *key, const struct Map &map) {
+    player->update(key, map);
 }
 
 

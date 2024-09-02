@@ -19,23 +19,23 @@ Player::Player(int startx, int starty, int size) {
     plane_y = 0.66;
 }
 
-void Player::update(const struct Map &map) {
+void Player::update(kb_key_t *key, const struct Map &map) {
 
     // check sprint
-    if (kb_Data[1] & kb_2nd) {
-        speed = 2*BASE_SPEED;
-    } else {
-        speed = BASE_SPEED;
-    }
+    // if (kb_Data[1] & kb_2nd) {
+    //     speed = 2*BASE_SPEED;
+    // } else {
+    //     speed = BASE_SPEED;
+    // }
 
     // update angle and rotate plane
-    if (kb_Data[7] & kb_Right) {
+    if (*key & kb_Right) {
         angle += angle_rotation_speed;
         // update/rotate plane
         double old_plane_x = plane_x;
         plane_x = old_plane_x * cos(angle_rotation_speed) - plane_y * sin(angle_rotation_speed);
         plane_y = old_plane_x * sin(angle_rotation_speed) + plane_y * cos(angle_rotation_speed);
-    } else if (kb_Data[7] & kb_Left) {
+    } else if (*key & kb_Left) {
         angle -= angle_rotation_speed;
         // update/rotate plane
         double old_plane_x = plane_x;
@@ -47,20 +47,20 @@ void Player::update(const struct Map &map) {
     angle = normalize_angle(angle);
 
     // move
-    if (kb_Data[7] & kb_Up) {
+    if (*key & kb_Up) {
         rect.x += speed * cos(angle);
         rect.y += speed * sin(angle);
-    } else if (kb_Data[7] & kb_Down) {
+    } else if (*key & kb_Down) {
         rect.x += speed * cos(angle - M_PI);
         rect.y += speed * sin(angle - M_PI);
     }
-    if (kb_Data[4] & kb_LParen) {
-        rect.x += speed * cos(angle + (M_PI / 2.0));
-        rect.y += speed * sin(angle + (M_PI / 2.0));
-    } else if (kb_Data[5] & kb_RParen) {
-        rect.x += speed * cos(angle - (M_PI / 2.0));
-        rect.y += speed * sin(angle - (M_PI / 2.0));
-    }
+    // if (kb_Data[4] & kb_LParen) {
+    //     rect.x += speed * cos(angle + (M_PI / 2.0));
+    //     rect.y += speed * sin(angle + (M_PI / 2.0));
+    // } else if (kb_Data[5] & kb_RParen) {
+    //     rect.x += speed * cos(angle - (M_PI / 2.0));
+    //     rect.y += speed * sin(angle - (M_PI / 2.0));
+    // }
 
     // update direction
     dir_x = cos(angle);

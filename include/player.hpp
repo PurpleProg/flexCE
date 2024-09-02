@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <keypadc.h>
 #include "../include/map.hpp"
 
 
@@ -15,7 +16,7 @@ public:
     double dir_y;
     double plane_x;
     double plane_y;
-    void update(const struct Map &map);
+    void update(kb_key_t *key, const struct Map &map);
     void render();
 private:
     float BASE_SPEED;

@@ -2,14 +2,14 @@ Section          Base   Top    High   Length
 ---------------- ------ ------ ------ -------
 .icon            D1A882 D1A891             Fh
 .init.libs       D1A891 D1A8E9            58h
-.libs            D1A8E9 D1A920            37h
-.init.clock      D1A920 D1A920             0h
-.init.reruncheck D1A920 D1A920             0h
-.init            D1A920 D1A94A            2Ah
-.fini            D1A94A D1A97E            34h
-.text            D1A97E D1B9B5          1037h
-.data            D1B9B5 D1B9C1             Ch
-.rodata          D1B9C1 D1BC23           262h
+.libs            D1A8E9 D1A92E            45h
+.init.clock      D1A92E D1A92E             0h
+.init.reruncheck D1A92E D1A92E             0h
+.init            D1A92E D1A958            2Ah
+.fini            D1A958 D1A98C            34h
+.text            D1A98C D1B761           DD5h
+.data            D1B761 D1B76D             Ch
+.rodata          D1B76D D1B9CF           262h
 .init_array      000000 000000             0h
 .ctors           000000 000000             0h
 .dtors           000000 000000             0h
@@ -29,12 +29,12 @@ ___ctors_count                  = 000000
 ___dtors_count                  = 000000
 ___fini_array_count             = 000000
 __stack                         = D1A87E
-__fneg                          = D1A97E
-__frameset                      = D1A98B
-__frameset0                     = D1A999
-__imulu                         = D1A9A4
-__ishl                          = D1A9D4
-__lcmpzero                      = D1A9FA
+__fneg                          = D1A98C
+__frameset                      = D1A999
+__frameset0                     = D1A9A7
+__imulu                         = D1A9B2
+__ishl                          = D1A9E2
+__lcmpzero                      = D1AA08
 __fadd                          = 000270
 __fcmp                          = 000274
 __fdiv                          = 000278
@@ -45,37 +45,36 @@ __ftoul                         = 00027C
 __ltof                          = 000284
 __setflag                       = 000218
 __ultof                         = 000280
-__sand                          = D1AA02
-_os_DisableHomeTextBuffer       = D1AA0B
-_os_EnableHomeTextBuffer        = D1AA1D
-_fminf                          = D1AA2F
+_os_DisableHomeTextBuffer       = D1AA10
+_os_EnableHomeTextBuffer        = D1AA22
+_fminf                          = D1AA34
 _cos                            = 02211C
 _cosf                           = 02211C
 _fabsf                          = 0220F0
-__isnanf                        = D1AA99
+__isnanf                        = D1AA9E
 _sinf                           = 022118
 _sin                            = 022118
-.missingappvar                  = D1B9C1
-.libloadname                    = D1B9C6
+.missingappvar                  = D1B76D
+.libloadname                    = D1B772
 .libloadnamelen                 = 000007
-.webaddress                     = D1B9CE
-__start                         = D1A920
-___exithl                       = D1A94A
-skip._exit                      = D1A94A
-skip.__Exit                     = D1A94A
-skip._abort                     = D1A94A
-_exit.sp                        = D1A94B
-_exit.flash_wait_states         = D1A955
-_main                           = D1AAB5
-__Z6renderP6PlayerRK3Map        = D1AB91
-__ZN6Player6updateERK3Map       = D1ABFE
-__ZN6Player15normalize_angleEd  = D1B268
-__ZN6Player11collide_mapERK3Map = D1B2B0
-__Z11render_raysP6PlayerRK3Map  = D1B5F1
-_global_palette                 = D1B9B5
+.webaddress                     = D1B77A
+__start                         = D1A92E
+___exithl                       = D1A958
+skip._exit                      = D1A958
+skip.__Exit                     = D1A958
+skip._abort                     = D1A958
+_exit.sp                        = D1A959
+_exit.flash_wait_states         = D1A963
+_main                           = D1AABA
+__Z6renderP6PlayerRK3Map        = D1ABAA
+__ZN6Player6updateEPhRK3Map     = D1AC17
+__ZN6Player15normalize_angleEd  = D1B014
+__ZN6Player11collide_mapERK3Map = D1B05C
+__Z11render_raysP6PlayerRK3Map  = D1B39D
+_global_palette                 = D1B761
 __ZZ4mainE6player               = D052C6
 __ZGVZ4mainE6player             = D052F2
-__ZN3Map4DATAE.const.7          = D1B9E3
+__ZN3Map4DATAE.const.7          = D1B78F
 lib.LibLoad                     = D1A8E9
 _#gfx_Begin                     = D1A8FC
 _#gfx_End                       = D1A900
@@ -86,3 +85,4 @@ _#gfx_Blit                      = D1A910
 _#gfx_VertLine                  = D1A914
 _#gfx_FillRectangle             = D1A918
 _#gfx_ZeroScreen                = D1A91C
+_#kb_Scan                       = D1A92A
